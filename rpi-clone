@@ -426,7 +426,6 @@ rsync $RSYNC_OPTIONS --delete \
 	$CLONE
 
 
-
 # Fixup some stuff
 #
 
@@ -455,6 +454,80 @@ done
 
 rm -f $CLONE/etc/udev/rules.d/70-persistent-net.rules
 
+#
+# Deploy with different values taken from catalog.txt
+#
+echo -n "Do you want to add some custom parameters (yes/no)?: "
+read resp
+if [ "$resp" = "y" ] || [ "$resp" = "yes" ]
+then
+	echo -n "Please type the name of the cloned raspberry : "
+	read RASP_NAME
+	if [ ! -f "$RASP_NAME.cfg" ]
+	then
+		echo ""
+		echo "The config file '$RASP_NAME.cfg' does not exist."
+		echo "If you want to custom deployment, please add a config file."
+		echo ""
+	else
+		echo "Reading '$RASP_NAME.cfg'..."
+		echo "======================================================"
+		. ./$RASP_NAME.cfg
+		echo "static_eth0_conf = $static_eth0_conf"		
+		echo "hostname = $hostname"		
+		echo "ip_dns = $ip_dns"		
+		echo "services = $services"	
+		echo "======================================================"
+		# Hostname
+		echo "The file $CLONE/etc/hostname was renamed to $CLONE/etc/hostname.dist."
+		mv $CLONE/etc/hostname $CLONE/etc/hostname.dist
+		echo $hostname > $CLONE/etc/hostname
+		echo "Hostname set to '$hostname' for Raspberry '$RASP_NAME'."
+		echo "======================================================"
+		# Resolv.conf
+		echo "The file $CLONE/etc/resolv.conf was renamed to $CLONE/etc/resolv.conf.dist."
+		mv $CLONE/etc/resolv.conf $CLONE/etc/resolv.conf.dist
+		echo "nameserver $ip_dns" > $CLONE/etc/resolv.conf	
+		echo "Nameserver is set to '$ip_dns' in resolv.conf."
+		echo "======================================================"
+		# network/interfaces
+		if [ "$static_eth0_conf" != "" ]
+		then
+			echo "You have choosen to define a static IP for this Rasp"
+			echo "Putting a static conf on eth0 in $CLONE/etc/network/interfaces..."
+			mv $CLONE/etc/network/interfaces $CLONE/etc/network/interfaces.dist
+			echo "The file $CLONE/etc/network/interfaces was renamed to $CLONE/etc/network/interfaces.dist."
+			cat /etc/network/interfaces | grep -v "eth0" > $CLONE/etc/network/interfaces
+			echo "$static_eth0_conf" >> $CLONE/etc/network/interfaces
+			echo "======================================================"
+		fi
+
+
+		# services
+		default_runlevel="1 2 3 4 5"
+		shutdown_runlevel="0 6"
+		if [ "$services" != "" ]
+		then
+			for service in $services
+			do
+				echo "Activate service '$service' for Raspberry '$RASP_NAME'."
+				# Startup
+				for l in $default_runlevel
+				do
+					echo "linking $CLONE/etc/ini.d/$service to $CLONE/etc/rc$l.d/S01$service"
+					ln -s $CLONE/etc/ini.d/$service $CLONE/etc/rc$l.d/S01$service
+				done
+				# Shutdown
+				for l in $shutdown_runlevel
+				do
+					echo "linking $CLONE/etc/ini.d/$service to $CLONE/etc/rc$l.d/K01$service"
+					ln -s $CLONE/etc/ini.d/$service $CLONE/etc/rc$l.d/K01$service
+				done
+				echo "======================================================"
+			done
+		fi
+	fi
+fi
 
 DATE=`date '+%F %H:%M'`
 
