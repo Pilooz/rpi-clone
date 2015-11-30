@@ -478,18 +478,21 @@ then
 		echo "ip_dns = $ip_dns"		
 		echo "services = $services"	
 		echo "======================================================"
+
 		# Hostname
 		echo "The file $CLONE/etc/hostname was renamed to $CLONE/etc/hostname.dist."
 		mv $CLONE/etc/hostname $CLONE/etc/hostname.dist
 		echo $hostname > $CLONE/etc/hostname
 		echo "Hostname set to '$hostname' for Raspberry '$RASP_NAME'."
 		echo "======================================================"
+
 		# Resolv.conf
 		echo "The file $CLONE/etc/resolv.conf was renamed to $CLONE/etc/resolv.conf.dist."
 		mv $CLONE/etc/resolv.conf $CLONE/etc/resolv.conf.dist
 		echo "nameserver $ip_dns" > $CLONE/etc/resolv.conf	
 		echo "Nameserver is set to '$ip_dns' in resolv.conf."
 		echo "======================================================"
+
 		# network/interfaces
 		if [ "$static_eth0_conf" != "" ]
 		then
@@ -501,7 +504,6 @@ then
 			echo "$static_eth0_conf" >> $CLONE/etc/network/interfaces
 			echo "======================================================"
 		fi
-
 
 		# services
 		default_runlevel="1 2 3 4 5"
@@ -515,13 +517,13 @@ then
 				for l in $default_runlevel
 				do
 					echo "linking $CLONE/etc/ini.d/$service to $CLONE/etc/rc$l.d/S01$service"
-					ln -s $CLONE/etc/ini.d/$service $CLONE/etc/rc$l.d/S01$service
+					ln -s $CLONE/etc/ini.d/$service /etc/rc$l.d/S01$service
 				done
 				# Shutdown
 				for l in $shutdown_runlevel
 				do
 					echo "linking $CLONE/etc/ini.d/$service to $CLONE/etc/rc$l.d/K01$service"
-					ln -s $CLONE/etc/ini.d/$service $CLONE/etc/rc$l.d/K01$service
+					ln -s $CLONE/etc/ini.d/$service /etc/rc$l.d/K01$service
 				done
 				echo "======================================================"
 			done
