@@ -1,0 +1,22 @@
+# Sample Configuration of a rasp as it is interpreted in rpi-clone
+# for the moment. 
+
+# If a static ip config on eth0 is needed, fill as below
+# This conf is written in /etc/network/interfaces
+# instead of eth0 conf
+static_eth0_conf="
+iface eth0 inet static
+address 192.168.1.11
+netmask 255.255.255.0
+gateway 192.168.1.11
+"
+
+# Hostname written in /etc/hostname
+hostname="rasp1"
+
+# Dns server in /etc/resolv.conf
+ip_dns="192.168.1.11"
+
+# Services to be started at boot of the raspberry 
+# If many, separate it with a space, eg. : "serv1 serv2 serv3"
+services="dnsmasq"
