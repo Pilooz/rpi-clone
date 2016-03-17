@@ -467,9 +467,10 @@ then
 	then
 		echo ""
 		echo "The config file '$RASP_NAME.cfg' does not exist."
-		echo "If you want to custom deployment, please add a config file."
+		echo "If you want to customize deployment, please add a config file."
 		echo ""
 	else
+		
 		echo "Reading '$RASP_NAME.cfg'..."
 		echo "======================================================"
 		. ./$RASP_NAME.cfg
@@ -479,11 +480,35 @@ then
 		echo "services = $services"	
 		echo "======================================================"
 
+		# services
+		if [ "$services" != "" ]
+		then
+			for service in $services
+			do
+				echo "Activate service '$service' on master."
+				sudo chkconfig --add $service
+			done
+			# All services added so rsync directory
+			echo "Synchronizing services on Raspberry '$RASP_NAME'."
+			sudo rsync $RSYNC_OPTIONS /etc $CLONE
+			# Delete added services on master
+			for service in $services
+			do
+				echo "Desactivating service '$service' on master."
+				sudo chkconfig --del $service
+			done
+		fi
+
 		# Hostname
 		echo "The file $CLONE/etc/hostname was renamed to $CLONE/etc/hostname.dist."
 		mv $CLONE/etc/hostname $CLONE/etc/hostname.dist
 		echo $hostname > $CLONE/etc/hostname
 		echo "Hostname set to '$hostname' for Raspberry '$RASP_NAME'."
+		echo "======================================================"
+		mv $CLONE/etc/hosts $CLONE/etc/network/hosts.dist
+		echo "The file $CLONE/etc/hosts was renamed to $CLONE/etc/hosts.dist."
+		cat /etc/hosts | grep -v "127.0.1.1" > $CLONE/etc/hosts
+		echo "127.0.1.1 $hostname" >> $CLONE/etc/hosts
 		echo "======================================================"
 
 		# Resolv.conf
@@ -503,30 +528,6 @@ then
 			cat /etc/network/interfaces | grep -v "eth0" > $CLONE/etc/network/interfaces
 			echo "$static_eth0_conf" >> $CLONE/etc/network/interfaces
 			echo "======================================================"
-		fi
-
-		# services
-		default_runlevel="1 2 3 4 5"
-		shutdown_runlevel="0 6"
-		if [ "$services" != "" ]
-		then
-			for service in $services
-			do
-				echo "Activate service '$service' for Raspberry '$RASP_NAME'."
-				# Startup
-				for l in $default_runlevel
-				do
-					echo "linking $CLONE/etc/ini.d/$service to $CLONE/etc/rc$l.d/S01$service"
-					ln -s $CLONE/etc/ini.d/$service /etc/rc$l.d/S01$service
-				done
-				# Shutdown
-				for l in $shutdown_runlevel
-				do
-					echo "linking $CLONE/etc/ini.d/$service to $CLONE/etc/rc$l.d/K01$service"
-					ln -s $CLONE/etc/ini.d/$service /etc/rc$l.d/K01$service
-				done
-				echo "======================================================"
-			done
 		fi
 	fi
 fi
