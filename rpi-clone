@@ -455,13 +455,13 @@ done
 rm -f $CLONE/etc/udev/rules.d/70-persistent-net.rules
 
 #
-# Deploy with different values taken from catalog.txt
+# Deploy with different values taken from *.cfg files
 #
 echo -n "Do you want to add some custom parameters (yes/no)?: "
 read resp
 if [ "$resp" = "y" ] || [ "$resp" = "yes" ]
 then
-	echo -n "Please type the name of the cloned raspberry : "
+	echo -n "Please type the name of the cloned raspberry (This name should match with a .cfg file): "
 	read RASP_NAME
 	if [ ! -f "$RASP_NAME.cfg" ]
 	then
