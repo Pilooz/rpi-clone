@@ -1,10 +1,10 @@
 # Sample Configuration of a rasp as it is interpreted in rpi-clone
 # for the moment. 
 
-# If a static ip config on eth0 is needed, fill as below
+# If a specific config on eth0 is needed, fill as below
 # This conf is written in /etc/network/interfaces
 # instead of eth0 conf
-static_eth0_conf="
+specific_eth0_conf="
 iface eth0 inet static
 address 192.168.1.11
 netmask 255.255.255.0

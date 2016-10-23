@@ -474,7 +474,7 @@ then
 		echo "Reading '$RASP_NAME.cfg'..."
 		echo "======================================================"
 		. ./$RASP_NAME.cfg
-		echo "static_eth0_conf = $static_eth0_conf"		
+		echo "specific_eth0_conf = $specific_eth0_conf"		
 		echo "hostname = $hostname"		
 		echo "ip_dns = $ip_dns"		
 		echo "services = $services"	
@@ -519,14 +519,14 @@ then
 		echo "======================================================"
 
 		# network/interfaces
-		if [ "$static_eth0_conf" != "" ]
+		if [ "$specific_eth0_conf" != "" ]
 		then
-			echo "You have choosen to define a static IP for this Rasp"
-			echo "Putting a static conf on eth0 in $CLONE/etc/network/interfaces..."
+			echo "You have choosen to define a specific conf on eth0 for this Rasp"
+			echo "Putting a specific conf on eth0 in $CLONE/etc/network/interfaces..."
 			mv $CLONE/etc/network/interfaces $CLONE/etc/network/interfaces.dist
 			echo "The file $CLONE/etc/network/interfaces was renamed to $CLONE/etc/network/interfaces.dist."
 			cat /etc/network/interfaces | grep -v "eth0" > $CLONE/etc/network/interfaces
-			echo "$static_eth0_conf" >> $CLONE/etc/network/interfaces
+			echo "$specific_eth0_conf" >> $CLONE/etc/network/interfaces
 			echo "======================================================"
 		fi
 	fi
